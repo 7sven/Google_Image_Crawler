@@ -1,4 +1,6 @@
 from selenium import webdriver
+import os
+import urllib.request
 import time
 
 
@@ -7,7 +9,16 @@ if __name__ == "__main__":
     LOADING_PAUSE_TIME = 2
     print("What do you want to search?:")
     search = input()
-    driver = webdriver.Chrome()
+    print("How many images do you want, end result might be less but not more")
+    amount = int(input())
+    print("Please wait! This will take some Time.")
+
+    options = webdriver.ChromeOptions()
+    options.add_argument('headless')
+    options.add_argument('window-size=1920x1080')
+    options.add_argument("disable-gpu")
+
+    driver = webdriver.Chrome('chromedriver', options=options)
     driver.get('https://www.google.de/imghp?hl=de&ogbl/xhtml')
 
     time.sleep(LOADING_PAUSE_TIME)
@@ -34,6 +45,18 @@ if __name__ == "__main__":
 
     images = driver.find_elements_by_tag_name('img')
 
+    if not os.path.exists(search):
+        os.makedirs(search)
+    for count, element in enumerate(images):
+        url = element.get_attribute('src')
+        if url is not None:
+            urllib.request.urlretrieve(url, search+'/'+search+str(count)+'.png')
+        else:
+            count = count - 1
+        if count == amount:
+            break
+
+    print("Congratulation your images are on your computer")
+
     driver.close()
 
-    print(len(images))
